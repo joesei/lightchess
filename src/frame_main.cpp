@@ -1,7 +1,4 @@
 
-#include <iostream>//print
-#include <thread> //sleep
-#include <chrono> //sleep
 #include "frame_main.h"
 
 
@@ -11,6 +8,7 @@ wxBEGIN_EVENT_TABLE(FrameMain, wxFrame)
   EVT_BUTTON(kSingleplayer, FrameMain::SPButtonClicked)
   EVT_BUTTON(kMultiplayer, FrameMain::MPButtonClicked)
   EVT_BUTTON(kSettings, FrameMain::SettingsButtonClicked)
+  EVT_SIZE(FrameMain::OnSizeChange)
 wxEND_EVENT_TABLE()
 
 FrameMain::FrameMain() : wxFrame(nullptr, wxID_ANY, "lightchess") {
@@ -37,24 +35,79 @@ void FrameMain::SettingsButtonClicked(wxCommandEvent &event) {
   event.Skip();
 }
 
+void FrameMain::OnSizeChange(wxSizeEvent &event) {
+
+  int height = this->GetSize().GetHeight();
+  int width = this->GetSize().GetWidth();
+  if (frame == Frames::kMain) {
+
+    int btn_height = height / 12;
+    int btn_width = width / 4;
+
+    singleplayer->SetSize(wxSize(btn_width, btn_height));
+    singleplayer->SetPosition(wxPoint(width / 2 - (btn_width / 2), height * 0.475));
+
+    multiplayer->SetSize(wxSize(btn_width, btn_height));
+    multiplayer->SetPosition(wxPoint(width / 2 - (btn_width / 2), height * 0.6));
+
+    settings->SetSize(wxSize(btn_width, btn_height));
+    settings->SetPosition(wxPoint(width / 2 - (btn_width / 2), height * 0.725));
+
+  } else if (frame == Frames::kColorSelect) {
+
+    // 1 point = 1.333 pixels
+    auto font = wxFont(height / 25, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
+    color_select_text->SetFont(font);
+    color_select_text->SetPosition(wxPoint(40, 40));
+
+    int btn_height = height / 12;
+    int btn_width = width / 5;
+
+    btn_white->SetSize(wxSize(btn_width, btn_height));
+    btn_black->SetSize(wxSize(btn_width, btn_height));
+
+    btn_white->SetPosition(wxPoint(width * 0.15, height * 0.5));
+    btn_black->SetPosition(wxPoint(width * 0.6, height * 0.5));
+  }
+  event.Skip();
+
+}
+
 void FrameMain::DisplayMainMenu() {
+  frame = Frames::kMain;
   this->DestroyChildren();
-  singleplayer = new wxButton(this, kSingleplayer, "Singleplayer", wxPoint(20, 20), wxSize(150, 30));
-  multiplayer = new wxButton(this, kMultiplayer, "Multiplayer", wxPoint(20, 60), wxSize(150, 30));
-  settings = new wxButton(this, kSettings, "Settings", wxPoint(20, 100), wxSize(150, 30));
+  singleplayer = new wxButton(this, kSingleplayer, "Singleplayer", wxPoint(0, 0), wxSize(120, 30));
+  multiplayer = new wxButton(this, kMultiplayer, "Multiplayer", wxPoint(0, 0), wxSize(120, 30));
+  settings = new wxButton(this, kSettings, "Settings", wxPoint(0, 0), wxSize(120, 30));
 
-  button_sizer = new wxBoxSizer(wxVERTICAL);
-  wxSizerFlags flags_expand(1);
-  flags_expand.Align(10).Center().Border(wxALL, 10);
-  button_sizer->Add(singleplayer, flags_expand);
-  button_sizer->Add(multiplayer, flags_expand);
-  button_sizer->Add(settings, flags_expand);
+  btn_sizer = new wxBoxSizer(wxVERTICAL);
+  btn_sizer->SetMinSize(wxSize(640, 360));
+  /*
+  wxSizerFlags flags_singleplayer(0);
+  wxSizerFlags flags_multiplayer(0);
+  wxSizerFlags flags_settings(0);
+  wxSizerFlags flags_spacer(0);
 
-  SetSizerAndFit(button_sizer);
+  flags_singleplayer.Center().Border(wxALL, 10);
+  flags_multiplayer.Center().Border(wxALL, 10);
+  flags_settings.Center().Border(wxALL, 10);
+  flags_spacer.Top();
+
+  button_sizer->Add(120, 30, flags_spacer);
+  button_sizer->Add(singleplayer, flags_singleplayer);
+  button_sizer->Add(multiplayer, flags_multiplayer);
+  button_sizer->Add(settings, flags_settings);
+  */
+  SetSizerAndFit(btn_sizer);
 }
 
 void FrameMain::DisplayColorSelect() {
+  frame = Frames::kColorSelect;
   this->DestroyChildren();
+
+  btn_white = new wxButton(this, kWhite, "White", wxPoint(0, 0), wxSize(120, 30));
+  btn_black = new wxButton(this, kBlack, "Black", wxPoint(0, 0), wxSize(120, 30));
+  color_select_text = new wxStaticText(this, wxID_ANY, "Select Color:");
 
 }
 
