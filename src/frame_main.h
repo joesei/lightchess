@@ -4,6 +4,7 @@
 
 
 #include <wx/wx.h>
+#include <wx/grid.h>
 
 
 class FrameMain : public wxFrame {
@@ -22,10 +23,16 @@ class FrameMain : public wxFrame {
   wxButton *btn_white = nullptr;
   wxButton *btn_black = nullptr;
 
+  // Chess Window
+  wxGridSizer *board = nullptr;
+  wxButton **squares = nullptr;
+
+
   wxDECLARE_EVENT_TABLE();
   void SPButtonClicked(wxCommandEvent &event);
   void MPButtonClicked(wxCommandEvent &event);
   void SettingsButtonClicked(wxCommandEvent &event);
+  void ColorButtonClicked(wxCommandEvent &event);
   void OnSizeChange(wxSizeEvent &event);
 
   enum class Frames {
@@ -39,6 +46,8 @@ class FrameMain : public wxFrame {
  private:
   void DisplayMainMenu();
   void DisplayColorSelect();
+  void DisplayChess();
+  bool is_white;
 
 };
 

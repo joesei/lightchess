@@ -8,6 +8,8 @@ wxBEGIN_EVENT_TABLE(FrameMain, wxFrame)
   EVT_BUTTON(kSingleplayer, FrameMain::SPButtonClicked)
   EVT_BUTTON(kMultiplayer, FrameMain::MPButtonClicked)
   EVT_BUTTON(kSettings, FrameMain::SettingsButtonClicked)
+  EVT_BUTTON(kWhite, FrameMain::ColorButtonClicked)
+  EVT_BUTTON(kBlack, FrameMain::ColorButtonClicked)
   EVT_SIZE(FrameMain::OnSizeChange)
 wxEND_EVENT_TABLE()
 
@@ -16,7 +18,7 @@ FrameMain::FrameMain() : wxFrame(nullptr, wxID_ANY, "lightchess") {
 }
 
 FrameMain::~FrameMain() {
-
+  delete[] squares;
 }
 
 
@@ -32,6 +34,13 @@ void FrameMain::MPButtonClicked(wxCommandEvent &event) {
 
 void FrameMain::SettingsButtonClicked(wxCommandEvent &event) {
 
+  event.Skip();
+}
+
+void FrameMain::ColorButtonClicked(wxCommandEvent &event) {
+  wxString color = ((wxButton*)(event.GetEventObject()))->GetLabel();
+  is_white = (color == "White");
+  DisplayChess();
   event.Skip();
 }
 
@@ -79,25 +88,8 @@ void FrameMain::DisplayMainMenu() {
   singleplayer = new wxButton(this, kSingleplayer, "Singleplayer", wxPoint(0, 0), wxSize(120, 30));
   multiplayer = new wxButton(this, kMultiplayer, "Multiplayer", wxPoint(0, 0), wxSize(120, 30));
   settings = new wxButton(this, kSettings, "Settings", wxPoint(0, 0), wxSize(120, 30));
-
   btn_sizer = new wxBoxSizer(wxVERTICAL);
   btn_sizer->SetMinSize(wxSize(640, 360));
-  /*
-  wxSizerFlags flags_singleplayer(0);
-  wxSizerFlags flags_multiplayer(0);
-  wxSizerFlags flags_settings(0);
-  wxSizerFlags flags_spacer(0);
-
-  flags_singleplayer.Center().Border(wxALL, 10);
-  flags_multiplayer.Center().Border(wxALL, 10);
-  flags_settings.Center().Border(wxALL, 10);
-  flags_spacer.Top();
-
-  button_sizer->Add(120, 30, flags_spacer);
-  button_sizer->Add(singleplayer, flags_singleplayer);
-  button_sizer->Add(multiplayer, flags_multiplayer);
-  button_sizer->Add(settings, flags_settings);
-  */
   SetSizerAndFit(btn_sizer);
 }
 
@@ -105,10 +97,45 @@ void FrameMain::DisplayColorSelect() {
   frame = Frames::kColorSelect;
   this->DestroyChildren();
 
+  // Also shown in OnSizeChange
+  int height = this->GetSize().GetHeight();
+  int width = this->GetSize().GetWidth();
+
   btn_white = new wxButton(this, kWhite, "White", wxPoint(0, 0), wxSize(120, 30));
   btn_black = new wxButton(this, kBlack, "Black", wxPoint(0, 0), wxSize(120, 30));
-  color_select_text = new wxStaticText(this, wxID_ANY, "Select Color:");
 
+  color_select_text = new wxStaticText(this, wxID_ANY, "Select Color:");
+  auto font = wxFont(height / 25, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL);
+  color_select_text->SetFont(font);
+  color_select_text->SetPosition(wxPoint(40, 40));
+  int btn_height = height / 12;
+  int btn_width = width / 5;
+
+  btn_white->SetSize(wxSize(btn_width, btn_height));
+  btn_black->SetSize(wxSize(btn_width, btn_height));
+
+  btn_white->SetPosition(wxPoint(width * 0.15, height * 0.5));
+  btn_black->SetPosition(wxPoint(width * 0.6, height * 0.5));
+}
+
+void FrameMain::DisplayChess() {
+  frame = Frames::kChess;
+  this->DestroyChildren();
+
+  board = new wxGridSizer(8, 8, 0, 0);
+  squares = new wxButton*[64];
+
+  for (int x = 0; x < 8; ++x) {
+    for (int y = 0; y < 8; ++y) {
+      squares[y * 8 + x] = new wxButton(this, wxID_ANY);
+      board->Add(squares[y * 8 + x], 1, wxEXPAND | wxALL);
+    }
+  }
+
+  this->SetSizer(board);
+
+  board->Layout();
+  this->Update();
 }
 
 
